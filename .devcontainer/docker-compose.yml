@@ -5,6 +5,13 @@ services:
     volumes:
       - ..:/workspaces:cached
     command: sleep infinity
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
   mongo:
     image: mongo:4.4.24
     restart: always

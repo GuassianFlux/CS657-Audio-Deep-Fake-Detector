@@ -3,3 +3,6 @@ data_sets
 
 // Images (for now)
 *.png
+
+//Cache Data
+src/__pycache__

@@ -80,7 +80,17 @@ class Data_Processor:
                 ax = axes[r][c]
                 plot_spectrogram(spectrograms[i].numpy(), ax)
                 ax.set_title(label_names[spect_labels[i].numpy()])
-            plt.savefig('fake_spectrograms_plot.png')   
+            plt.savefig('fake_spectrograms_plot.png')
+        label_names = np.array(self.real_ds.class_names)
+        for spectrograms, spect_labels in self.real_spectrograms.take(1):
+            rows = 1
+            cols = 1
+            n = rows*cols
+            fig, axes = plt.subplots(rows, cols, figsize=(16, 9))
+
+            plot_spectrogram(spectrograms[i].numpy(), axes)
+            axes.set_title(label_names[spect_labels[i].numpy()])
+            plt.savefig('real_spectrograms_plot.png')   
 
     def plot_first_waveform(self):
         label_names = np.array(self.fake_ds.class_names)

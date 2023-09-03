@@ -36,50 +36,65 @@ def plot_spectrogram(spectrogram, ax):
     ax.pcolormesh(x,y,log_spec)
 
 class Data_Processor:
-    def __init__(self, dataFilePath):
-        self.dataFilePath = dataFilePath
-
-    def loadDataset(self):
-        data_dir = pathlib.Path(self.dataFilePath)
-        print("Loading", self.dataFilePath)
-        self.train_ds = tf.keras.utils.audio_dataset_from_directory(
+    def load_real_dataset(self, data_file_path):
+        data_dir = pathlib.Path(data_file_path)
+        print("[INFO] Loading", data_file_path)
+        self.real_ds = tf.keras.utils.audio_dataset_from_directory(
+        directory=data_dir,
+        batch_size=64,
+        validation_split=0,
+        seed=0,
+        output_sequence_length=16000)
+    
+    def load_fake_dataset(self, data_file_path):
+        data_dir = pathlib.Path(data_file_path)
+        print("[INFO] Loading", data_file_path)
+        self.fake_ds = tf.keras.utils.audio_dataset_from_directory(
         directory=data_dir,
         batch_size=64,
         validation_split=0,
         seed=0,
         output_sequence_length=16000)
 
-    def makeSpectrogram(self, outputFilename):
-        label_names = np.array(self.train_ds.class_names)
-        train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
-        for example_audio, example_labels in train_ds.take(1):
-            for i in range(3):
-                label = label_names[example_labels[i]]
-                waveform = example_audio[i]
-                spectrogram = get_spectrogram(waveform)
-                fig, axes = plt.subplots(2,1)
-                timescale = np.arange(waveform.shape[0])
-                axes[0].plot(timescale, waveform.numpy())
-                axes[0].set_title('Waveform')
-                axes[0].set_xlim([0, 16000])
-                plot_spectrogram(spectrogram.numpy(), axes[1])
-                axes[1].set_title('Spectrogram')
-                plt.suptitle(label.title())
-                plt.savefig(outputFilename+'_'+str(i)+'.png')
+    def make_spectrogram_datasets(self):
+        real_ds = self.real_ds.map(squeeze, tf.data.AUTOTUNE)
+        fake_ds = self.fake_ds.map(squeeze, tf.data.AUTOTUNE)
+        self.real_spectrograms = real_ds.map(
+            map_func=lambda audio, label: (get_spectrogram(audio), label),
+            num_parallel_calls=tf.data.AUTOTUNE)
+        self.fake_spectrograms = fake_ds.map(
+            map_func=lambda audio, label: (get_spectrogram(audio), label),
+            num_parallel_calls=tf.data.AUTOTUNE)
 
-    def plotFirstSample(self, outputFilename):
-        label_names = np.array(self.train_ds.class_names)
-        train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
-        for example_audio, example_labels in train_ds.take(1):  
+    def plot_first_spectrogram(self):
+        label_names = np.array(self.fake_ds.class_names)
+        for spectrograms, spect_labels in self.fake_spectrograms.take(1):
+            rows = 3
+            cols = 3
+            n = rows*cols
+            fig, axes = plt.subplots(rows, cols, figsize=(16, 9))
+
+            for i in range(n):
+                r = i // cols
+                c = i % cols
+                ax = axes[r][c]
+                plot_spectrogram(spectrograms[i].numpy(), ax)
+                ax.set_title(label_names[spect_labels[i].numpy()])
+            plt.savefig('fake_spectrograms_plot.png')   
+
+    def plot_first_waveform(self):
+        label_names = np.array(self.fake_ds.class_names)
+        fake_ds = self.fake_ds.map(squeeze, tf.data.AUTOTUNE)
+        for audio, labels in fake_ds.take(1):  
             plt.figure(figsize=(16, 10))
             rows = 3
             cols = 3
             n = rows * cols
             for i in range(n):
                 plt.subplot(rows, cols, i+1)
-                audio_signal = example_audio[i]
+                audio_signal = audio[i]
                 plt.plot(audio_signal)
-                plt.title(label_names[example_labels[i]])
+                plt.title(label_names[labels[i]])
                 plt.yticks(np.arange(-1.2, 1.2, 0.2))
                 plt.ylim([-1.1, 1.1])
-                plt.savefig(outputFilename)
+                plt.savefig('fake_waveform_plot.png')

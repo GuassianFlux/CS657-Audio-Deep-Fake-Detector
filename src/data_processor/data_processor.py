@@ -1,4 +1,3 @@
-import os
 import pathlib
 
 import matplotlib.pyplot as plt
@@ -36,6 +35,12 @@ def plot_spectrogram(spectrogram, ax):
     ax.pcolormesh(x,y,log_spec)
 
 class Data_Processor:
+    def __init__(self):
+        self.real_ds = []
+        self.fake_ds = []
+        self.real_spectrograms = []
+        self.fake_spectrograms = []
+
     def load_real_dataset(self, data_file_path):
         data_dir = pathlib.Path(data_file_path)
         print("[INFO] Loading", data_file_path)
@@ -46,6 +51,9 @@ class Data_Processor:
         seed=0,
         output_sequence_length=16000)
     
+    def get_real_dataset(self):
+        return self.real_ds
+
     def load_fake_dataset(self, data_file_path):
         data_dir = pathlib.Path(data_file_path)
         print("[INFO] Loading", data_file_path)
@@ -56,6 +64,9 @@ class Data_Processor:
         seed=0,
         output_sequence_length=16000)
 
+    def get_fake_dataset(self):
+        return self.fake_ds
+
     def make_spectrogram_datasets(self):
         real_ds = self.real_ds.map(squeeze, tf.data.AUTOTUNE)
         fake_ds = self.fake_ds.map(squeeze, tf.data.AUTOTUNE)
@@ -65,6 +76,12 @@ class Data_Processor:
         self.fake_spectrograms = fake_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE)
+
+    def get_real_spectrograms(self):
+        return self.real_spectrograms
+    
+    def get_fake_spectrograms(self):
+        return self.fake_spectrograms
 
     def plot_dual_wave_spec(self):
         label_names = np.array(self.fake_ds.class_names)

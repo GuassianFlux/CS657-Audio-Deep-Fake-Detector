@@ -1,4 +1,4 @@
-from data_processor import Data_Processor
+from data_processor.data_processor import Data_Processor
 
 DATASET_PATH_FAKE = '/workspaces/data_sets/fake_audio/generated_audio'
 DATASET_PATH_REAL = '/workspaces/data_sets/real_audio/LJSpeech-1.1'

@@ -11,3 +11,4 @@ if __name__ == "__main__":
     processor.make_spectrogram_datasets()
     processor.plot_first_spectrogram()
     processor.plot_first_waveform()
+    processor.plot_dual_wave_spec()

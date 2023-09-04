@@ -66,6 +66,26 @@ class Data_Processor:
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE)
 
+    def plot_dual_wave_spec(self):
+        label_names = np.array(self.fake_ds.class_names)
+        fake_ds = self.fake_ds.map(squeeze, tf.data.AUTOTUNE)
+        for audio, labels in fake_ds.take(1):
+            for i in range(3):
+                label = label_names[labels[i]]
+                waveform = audio[i]
+                spectrogram = get_spectrogram(waveform)
+
+                fig, axes = plt.subplots(2, figsize=(12, 8))
+                timescale = np.arange(waveform.shape[0])
+                axes[0].plot(timescale, waveform.numpy())
+                axes[0].set_title('Waveform')
+                axes[0].set_xlim([0, 16000])
+
+                plot_spectrogram(spectrogram.numpy(), axes[1])
+                axes[1].set_title('Spectrogram')
+                plt.suptitle(label.title())
+                plt.savefig('fake_wave_with_spec.png')
+
     def plot_first_spectrogram(self):
         label_names = np.array(self.fake_ds.class_names)
         for spectrograms, spect_labels in self.fake_spectrograms.take(1):

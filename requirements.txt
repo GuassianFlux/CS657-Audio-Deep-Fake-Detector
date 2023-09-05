@@ -3,3 +3,4 @@ tensorflow==2.12
 matplotlib
 tensorflow-io
 pandas
+tensorrt

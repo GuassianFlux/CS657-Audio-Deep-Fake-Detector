@@ -15,7 +15,7 @@ class Model_Utils:
     @staticmethod
     def fit_model(train, val, epochs):
         model = Model_Utils._create_default_model()
-        model_id = uuid.uuid5()
+        model_id = uuid.uuid4()
         model_folder = Model_Utils._build_model_path(model_id)
         metrics_path = os.path.join(model_folder, Model_Utils.metrics_file_name)
         csv_logger = CSVLogger(metrics_path, separator=',', append=False)
@@ -40,14 +40,16 @@ class Model_Utils:
         model.add(Dense(128, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))
         model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recall(),tf.keras.metrics.Precision(),tf.keras.metrics.Accuracy()])
+        model.summary()
         return model
 
     @staticmethod
     def load_model(model_id):
         model_folder = Model_Utils._build_model_path(model_id)
-        model_path= os.path.join(model_folder, Model_Utils.model_file_name)
-        loaded_model = tf.keras.saving.load_model(model_path)
         metrics_path = os.path.join(model_folder, Model_Utils.metrics_file_name)
         metrics_data = pd.read_csv(metrics_path, sep=',', engine='python')
         print("Metrics:", metrics_data)
+        model_path= os.path.join(model_folder, Model_Utils.model_file_name)
+        loaded_model = tf.keras.saving.load_model(model_path)
         loaded_model.summary()
+        return loaded_model

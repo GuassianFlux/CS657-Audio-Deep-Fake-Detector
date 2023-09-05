@@ -8,6 +8,7 @@ from tensorflow.python.keras.models import Sequential
 from keras.callbacks import CSVLogger
 import uuid
 from model_utilities.model_utils import Model_Utils
+from keras import backend as kerasbackend
 
 def squeeze(audio, labels):
   audio = tf.squeeze(audio, axis=-1)
@@ -152,27 +153,52 @@ class Data_Processor:
                 plt.savefig('fake_waveform_plot.png')
 
     def fit_model(self, models_dir):
-        data = self.real_spectrograms.concatenate(self.fake_spectrograms)
-        train = data.take(6)
-        val = data.skip(6).take(2)
-
-        model = Model_Utils.create_default_model()
+        print("Preparing to train model...")
+        # Split the spectrogram datasets for training and validation
+        train, val = self._split_data()
+        # Build the folder for the model
         model_id = uuid.uuid4()
+        print("Model ID:", str(model_id))
         model_folder = Model_Utils.build_model_path(models_dir, model_id)
-        metric_file = Model_Utils.metrics_file_name
-        metrics_path = os.path.join(model_folder, metric_file)
+        print("Model and metrics will be saved in", model_folder)
+        # Path where all of the model history and metrics will be saved
+        metrics_path = os.path.join(model_folder, Model_Utils.metrics_file_name)
         csv_logger = CSVLogger(metrics_path, separator=',', append=False)
-        
+        print("Creating metrics file", metrics_path)
+        # Create and fit the model
+        print("Creating and fitting model...")
+        model = Model_Utils.create_default_model()
         history = model.fit(
             train,
             validation_data=val,
             epochs=1,
             callbacks=[csv_logger],
         )
-
-        model_file = Model_Utils.model_file_name
-        model_path= os.path.join(model_folder, model_file)
+        # Save the model to file
+        model_path= os.path.join(model_folder, Model_Utils.model_file_name)
+        print("Saving model to path", model_path)
         model.save(model_path)
+        print("Printing model summary")
         model.summary()
-        print('Accuracy:', history.history['accuracy'])
+        print('Model accuracy:', history.history['accuracy'])
+        # Clear the keras session and cleanup
+        print("Clearing model session")
+        kerasbackend.clear_session()
+        del model
         return str(model_id)
+    
+    def _split_data(self):
+        # Not sure if this is actually how we want to split the data
+        print("Splitting dataset for training and validation...")
+        data = self.real_spectrograms.concatenate(self.fake_spectrograms)
+        data.shuffle(1000)
+        data.batch(64)
+        size = sum(1 for _ in data.unbatch())
+        print("Total Dataset Size:", str(size))
+        train_size = np.int64(size * 0.8)
+        print("Training Set Size:", str(train_size))
+        val_size = np.int64(size * 0.2)
+        print("Validation Set Size:", str(val_size))
+        train = data.take(train_size)
+        val = data.skip(train_size).take(val_size)
+        return train, val

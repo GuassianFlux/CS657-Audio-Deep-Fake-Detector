@@ -22,6 +22,8 @@ class Model_Utils:
 
     @staticmethod
     def build_model_path(models_dir, model_id):
+        if not os.path.exists(models_dir):
+            os.makedirs(models_dir)
         model_folder = os.path.join(models_dir, str(model_id))
         if not os.path.exists(model_folder):
             os.makedirs(model_folder)

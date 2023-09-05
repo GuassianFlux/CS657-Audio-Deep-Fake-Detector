@@ -1,8 +1,13 @@
 import pathlib
-
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
+import os
+import tensorflow as tf 
+from tensorflow.python.keras.models import Sequential
+from keras.callbacks import CSVLogger
+import uuid
+from model_utilities.model_utils import Model_Utils
 
 def squeeze(audio, labels):
   audio = tf.squeeze(audio, axis=-1)
@@ -145,3 +150,29 @@ class Data_Processor:
                 plt.yticks(np.arange(-1.2, 1.2, 0.2))
                 plt.ylim([-1.1, 1.1])
                 plt.savefig('fake_waveform_plot.png')
+
+    def fit_model(self, models_dir):
+        data = self.real_spectrograms.concatenate(self.fake_spectrograms)
+        train = data.take(6)
+        val = data.skip(6).take(2)
+
+        model = Model_Utils.create_default_model()
+        model_id = uuid.uuid4()
+        model_folder = Model_Utils.build_model_path(models_dir, model_id)
+        metric_file = Model_Utils.metrics_file_name
+        metrics_path = os.path.join(model_folder, metric_file)
+        csv_logger = CSVLogger(metrics_path, separator=',', append=False)
+        
+        history = model.fit(
+            train,
+            validation_data=val,
+            epochs=1,
+            callbacks=[csv_logger],
+        )
+
+        model_file = Model_Utils.model_file_name
+        model_path= os.path.join(model_folder, model_file)
+        model.save(model_path)
+        model.summary()
+        print('Accuracy:', history.history['accuracy'])
+        return str(model_id)

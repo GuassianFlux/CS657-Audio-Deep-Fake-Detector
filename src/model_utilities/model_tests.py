@@ -1,7 +1,7 @@
 import unittest
 import os
 import tensorflow as tf 
-from  model_utils import Model_Utils
+from  model_utilities.model_utils import Model_Utils
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Conv2D, Dense, Flatten
 from keras.callbacks import CSVLogger

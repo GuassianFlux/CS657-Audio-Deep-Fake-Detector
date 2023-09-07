@@ -1,6 +1,9 @@
 // Test Data
 data_sets
 
+// Trained Models
+trained_models
+
 // Images (for now)
 *.png
 

@@ -4,3 +4,4 @@ matplotlib
 tensorflow-io
 pandas
 tensorrt
+seaborn

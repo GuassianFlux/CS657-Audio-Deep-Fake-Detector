@@ -77,6 +77,12 @@ class Data_Processor:
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE)
         
+    def get_test_dataset(self):
+        return self.test_spectrograms
+    
+    def get_label_names(self):
+        return self.label_names
+        
     def plot_dual_wave_spec(self):
         label_names = np.array(self.train_ds.class_names)
         train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
@@ -161,7 +167,7 @@ class Data_Processor:
         history = model.fit(
             self.train_spectrograms,
             validation_data=self.val_spectrograms,
-            epochs=10,
+            epochs=20,
             callbacks=[csv_logger],
         )
         # Save the model to file
@@ -176,17 +182,3 @@ class Data_Processor:
         kerasbackend.clear_session()
         del model
         return str(model_id)
-    
-    def _split_data(self):
-        # Not sure if this is actually how we want to split the data
-        print("Splitting dataset for training and validation...")
-        data = self.real_spectrograms.concatenate(self.fake_spectrograms)
-        size = sum(1 for _ in data.unbatch())
-        print("Total Dataset Size:", str(size))
-        train_size = np.int64(size * 0.8)
-        print("Training Set Size:", str(train_size))
-        val_size = np.int64(size * 0.2)
-        print("Validation Set Size:", str(val_size))
-        train = data.take(train_size)
-        val = data.skip(train_size).take(val_size)
-        return train, val

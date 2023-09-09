@@ -10,10 +10,10 @@ class Model_Utils:
     model_file_name = "model.keras"
 
     @staticmethod
-    def create_default_model():
+    def create_default_model(input_shape_size):
         model = Sequential()
-        model.add(Conv2D(32, (3,3), activation='relu'))
-        model.add(Conv2D(64, (3,3), activation='relu'))
+        model.add(Conv2D(16, (3,3), activation='relu', input_shape=input_shape_size))
+        model.add(Conv2D(16, (3,3), activation='relu'))
         model.add(Flatten())
         model.add(Dense(128, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))

@@ -13,15 +13,11 @@ class DeepFake_Detector:
     def predict(self, test_spectrogram_ds, label_names):
         self.loaded_model.evaluate(test_spectrogram_ds, return_dict=True)
         y_pred = self.loaded_model.predict(test_spectrogram_ds)
-        y_pred = tf.argmax(y_pred, axis=1)
-        y_true = tf.concat(list(test_spectrogram_ds.map(lambda s,lab: lab)), axis=0)
-        confusion_mtx = tf.math.confusion_matrix(y_true, y_pred)
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(confusion_mtx,
-            xticklabels=label_names,
-            yticklabels=label_names,
-            annot=True, fmt='g')
-        plt.xlabel('Prediction')
-        plt.ylabel('Label')
-        plt.show()
-    
+        y_pred = [1 if prediction > 0.5 else 0 for prediction in y_pred]
+        file_num = 1
+        for prediction in y_pred:
+            prediction_text = "Real"
+            if prediction == 1:
+                prediction_text = "Fake"
+            print("Test File", file_num, "Prediction:", prediction_text)
+            file_num = file_num + 1

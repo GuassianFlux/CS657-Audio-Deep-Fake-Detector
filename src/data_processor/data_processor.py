@@ -58,6 +58,7 @@ class Data_Processor:
             validation_split=0.2,
             seed=0,
             subset='both',
+            shuffle=True,
             output_sequence_length=16000)
         self.label_names = np.array(self.train_ds.class_names)
         print("Label Names:", self.label_names)
@@ -167,7 +168,7 @@ class Data_Processor:
         history = model.fit(
             self.train_spectrograms,
             validation_data=self.val_spectrograms,
-            epochs=20,
+            epochs=100,
             callbacks=[csv_logger],
         )
         # Save the model to file

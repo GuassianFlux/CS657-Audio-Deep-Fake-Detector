@@ -1,12 +1,7 @@
 import unittest
-import os
 import tensorflow as tf 
 from  model_utilities.model_utils import Model_Utils
 from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Conv2D, Dense, Flatten
-from keras.callbacks import CSVLogger
-import pandas as pd
-import uuid
 
 def load_and_process_wav(filename):
     file_contents = tf.io.read_file(filename)

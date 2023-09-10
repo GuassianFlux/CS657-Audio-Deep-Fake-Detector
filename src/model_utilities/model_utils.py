@@ -34,7 +34,7 @@ class Model_Utils:
         model_folder = Model_Utils.build_model_path(models_dir, model_id)
         metrics_path = os.path.join(model_folder, Model_Utils.metrics_file_name)
         metrics_data = pd.read_csv(metrics_path, sep=',', engine='python')
-        print("Metrics:", metrics_data)
+        print(metrics_data)
         model_path= os.path.join(model_folder, Model_Utils.model_file_name)
         loaded_model = tf.keras.saving.load_model(model_path)
         loaded_model.summary()

@@ -10,9 +10,6 @@ import uuid
 from model_utilities.model_utils import Model_Utils
 from keras import backend as kerasbackend
 
-def test(waveform):
-    return waveform
-
 def squeeze(audio, labels):
   audio = tf.squeeze(audio, axis=-1)
   return audio, labels

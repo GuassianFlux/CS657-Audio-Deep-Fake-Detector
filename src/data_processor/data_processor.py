@@ -46,7 +46,6 @@ def plot_spectrogram(spectrogram, ax):
 class Data_Processor:
     def __init__(self):
         self.real_ds = []
-        self.noise_ds = []
         self.fake_ds = []
         self.real_spectrograms = []
         self.fake_spectrograms = []
@@ -144,8 +143,8 @@ class Data_Processor:
         fake_ds = self.fake_ds.map(squeeze, tf.data.AUTOTUNE)
         for audio, labels in fake_ds.take(1):  
             plt.figure(figsize=(16, 10))
-            rows = 1
-            cols = 1
+            rows = 3
+            cols = 3
             n = rows * cols
             for i in range(n):
                 plt.subplot(rows, cols, i+1)

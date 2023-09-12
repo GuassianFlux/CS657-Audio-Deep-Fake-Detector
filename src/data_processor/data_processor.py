@@ -42,57 +42,52 @@ def plot_spectrogram(spectrogram, ax):
 
 class Data_Processor:
     def __init__(self):
-        self.real_ds = []
-        self.fake_ds = []
-        self.real_spectrograms = []
-        self.fake_spectrograms = []
+        self.train_ds = []
+        self.val_ds = []
+        self.train_spectrograms = []
+        self.val_spectrograms = []
+        self.test_spectrograms = []
+        self.label_names = []
 
-    def load_real_dataset(self, data_file_path):
+    def load_datasets(self, data_file_path):
         data_dir = pathlib.Path(data_file_path)
         print("[INFO] Loading", data_file_path)
-        self.real_ds = tf.keras.utils.audio_dataset_from_directory(
-        directory=data_dir,
-        batch_size=64,
-        validation_split=0,
-        seed=0,
-        output_sequence_length=16000)
-    
-    def get_real_dataset(self):
-        return self.real_ds
-
-    def load_fake_dataset(self, data_file_path):
-        data_dir = pathlib.Path(data_file_path)
-        print("[INFO] Loading", data_file_path)
-        self.fake_ds = tf.keras.utils.audio_dataset_from_directory(
-        directory=data_dir,
-        batch_size=64,
-        validation_split=0,
-        seed=0,
-        output_sequence_length=16000)
-
-    def get_fake_dataset(self):
-        return self.fake_ds
+        self.train_ds, self.val_ds = tf.keras.utils.audio_dataset_from_directory(
+            directory=data_dir,
+            batch_size=64,
+            validation_split=0.2,
+            seed=0,
+            subset='both',
+            shuffle=True,
+            output_sequence_length=16000)
+        self.label_names = np.array(self.train_ds.class_names)
+        print("Label Names:", self.label_names)
 
     def make_spectrogram_datasets(self):
-        real_ds = self.real_ds.map(squeeze, tf.data.AUTOTUNE)
-        fake_ds = self.fake_ds.map(squeeze, tf.data.AUTOTUNE)
-        self.real_spectrograms = real_ds.map(
+        train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
+        val_ds = self.val_ds.map(squeeze, tf.data.AUTOTUNE)
+        test_ds = val_ds.shard(num_shards=2, index=0)
+        val_ds = val_ds.shard(num_shards=2, index=1)
+        self.train_spectrograms = train_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE)
-        self.fake_spectrograms = fake_ds.map(
+        self.val_spectrograms = val_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE)
-
-    def get_real_spectrograms(self):
-        return self.real_spectrograms
+        self.test_spectrograms = test_ds.map(
+            map_func=lambda audio, label: (get_spectrogram(audio), label),
+            num_parallel_calls=tf.data.AUTOTUNE)
+        
+    def get_test_dataset(self):
+        return self.test_spectrograms
     
-    def get_fake_spectrograms(self):
-        return self.fake_spectrograms
-
+    def get_label_names(self):
+        return self.label_names
+        
     def plot_dual_wave_spec(self):
-        label_names = np.array(self.fake_ds.class_names)
-        fake_ds = self.fake_ds.map(squeeze, tf.data.AUTOTUNE)
-        for audio, labels in fake_ds.take(1):
+        label_names = np.array(self.train_ds.class_names)
+        train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
+        for audio, labels in train_ds.take(1):
             for i in range(3):
                 label = label_names[labels[i]]
                 waveform = audio[i]
@@ -110,8 +105,8 @@ class Data_Processor:
                 plt.savefig('fake_wave_with_spec.png')
 
     def plot_first_spectrogram(self):
-        label_names = np.array(self.fake_ds.class_names)
-        for spectrograms, spect_labels in self.fake_spectrograms.take(1):
+        label_names = np.array(self.train_ds.class_names)
+        for spectrograms, spect_labels in self.train_spectrograms.take(1):
             rows = 3
             cols = 3
             n = rows*cols
@@ -124,8 +119,8 @@ class Data_Processor:
                 plot_spectrogram(spectrograms[i].numpy(), ax)
                 ax.set_title(label_names[spect_labels[i].numpy()])
             plt.savefig('fake_spectrograms_plot.png')
-        label_names = np.array(self.real_ds.class_names)
-        for spectrograms, spect_labels in self.real_spectrograms.take(1):
+        label_names = np.array(self.val_ds.class_names)
+        for spectrograms, spect_labels in self.val_spectrograms.take(1):
             rows = 1
             cols = 1
             n = rows*cols
@@ -136,9 +131,9 @@ class Data_Processor:
             plt.savefig('real_spectrograms_plot.png')   
 
     def plot_first_waveform(self):
-        label_names = np.array(self.fake_ds.class_names)
-        fake_ds = self.fake_ds.map(squeeze, tf.data.AUTOTUNE)
-        for audio, labels in fake_ds.take(1):  
+        label_names = np.array(self.train_ds.class_names)
+        train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
+        for audio, labels in train_ds.take(1):  
             plt.figure(figsize=(16, 10))
             rows = 3
             cols = 3
@@ -154,8 +149,6 @@ class Data_Processor:
 
     def fit_model(self, models_dir):
         print("Preparing to train model...")
-        # Split the spectrogram datasets for training and validation
-        train, val = self._split_data()
         # Build the folder for the model
         model_id = uuid.uuid4()
         print("Model ID:", str(model_id))
@@ -167,17 +160,21 @@ class Data_Processor:
         print("Creating metrics file", metrics_path)
         # Create and fit the model
         print("Creating and fitting model...")
-        model = Model_Utils.create_default_model()
+        for example_spectrograms, example_spect_labels in self.train_spectrograms.take(1):
+            break
+        input_shape = example_spectrograms.shape[1:]
+        print('Input shape:', input_shape)
+        model = Model_Utils.create_default_model(input_shape)
         history = model.fit(
-            train,
-            validation_data=val,
-            epochs=1,
+            self.train_spectrograms,
+            validation_data=self.val_spectrograms,
+            epochs=100,
             callbacks=[csv_logger],
         )
         # Save the model to file
         model_path= os.path.join(model_folder, Model_Utils.model_file_name)
         print("Saving model to path", model_path)
-        model.save(model_path)
+        model.save(model_path, save_format='tf')
         print("Printing model summary")
         model.summary()
         print('Model accuracy:', history.history['accuracy'])
@@ -186,19 +183,3 @@ class Data_Processor:
         kerasbackend.clear_session()
         del model
         return str(model_id)
-    
-    def _split_data(self):
-        # Not sure if this is actually how we want to split the data
-        print("Splitting dataset for training and validation...")
-        data = self.real_spectrograms.concatenate(self.fake_spectrograms)
-        data.shuffle(1000)
-        data.batch(64)
-        size = sum(1 for _ in data.unbatch())
-        print("Total Dataset Size:", str(size))
-        train_size = np.int64(size * 0.8)
-        print("Training Set Size:", str(train_size))
-        val_size = np.int64(size * 0.2)
-        print("Validation Set Size:", str(val_size))
-        train = data.take(train_size)
-        val = data.skip(train_size).take(val_size)
-        return train, val

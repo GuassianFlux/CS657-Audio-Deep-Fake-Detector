@@ -70,13 +70,13 @@ class Data_Processor:
         val_ds = val_ds.shard(num_shards=2, index=1)
         self.train_spectrograms = train_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
-            num_parallel_calls=tf.data.AUTOTUNE)
+            num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
         self.val_spectrograms = val_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
-            num_parallel_calls=tf.data.AUTOTUNE)
+            num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
         self.test_spectrograms = test_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
-            num_parallel_calls=tf.data.AUTOTUNE)
+            num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
         
     def get_test_dataset(self):
         return self.test_spectrograms
@@ -168,7 +168,7 @@ class Data_Processor:
         history = model.fit(
             self.train_spectrograms,
             validation_data=self.val_spectrograms,
-            epochs=100,
+            epochs=5,
             callbacks=[csv_logger],
         )
         # Save the model to file

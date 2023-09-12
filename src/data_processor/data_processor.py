@@ -1,3 +1,5 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import pathlib
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -50,6 +52,7 @@ class Data_Processor:
         self.label_names = []
 
     def load_datasets(self, data_file_path):
+        print("Loading data sets from", data_file_path)
         data_dir = pathlib.Path(data_file_path)
         self.train_ds,self.val_ds = tf.keras.utils.audio_dataset_from_directory(
             directory=data_dir,
@@ -60,7 +63,6 @@ class Data_Processor:
             output_sequence_length=16000,
             subset='both')
         self.label_names = np.array(self.train_ds.class_names)
-        print("label names:", self.label_names)
 
     def make_spectrogram_datasets(self):
         train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
@@ -69,13 +71,13 @@ class Data_Processor:
         val_ds = val_ds.shard(num_shards=2, index=1)
         self.train_spectrograms = train_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
-            num_parallel_calls=tf.data.AUTOTUNE)
+            num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
         self.val_spectrograms = val_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
-            num_parallel_calls=tf.data.AUTOTUNE)
+            num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
         self.test_spectrograms = test_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
-            num_parallel_calls=tf.data.AUTOTUNE)
+            num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
         
     def get_test_dataset(self):
         return self.test_spectrograms

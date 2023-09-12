@@ -1,3 +1,5 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from model_utilities.model_utils import Model_Utils
 
 class DeepFake_Detector:

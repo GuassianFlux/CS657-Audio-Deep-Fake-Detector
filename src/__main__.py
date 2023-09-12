@@ -12,7 +12,8 @@ import warnings
 import shutil
 
 # Path of the dataset that will be used to train, validate, and test the model. Classes will be 
-# constrcuted based on the folders in this directory(Ex. fake, real)
+# constrcuted based on the folders in this directory(Ex. fake, real). The small dataset can be 
+# used for demo. Make sure the dataset only has a real and fake folder as children.
 DATASET_PATH = '/workspaces/small_data_sets'
 # DATASET_PATH = '/workspaces/data_sets'
 

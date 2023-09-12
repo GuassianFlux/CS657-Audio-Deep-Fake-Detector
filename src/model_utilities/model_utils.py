@@ -1,7 +1,5 @@
 import os
 import tensorflow as tf 
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Conv2D, Dense, Flatten
 import pandas as pd
 
 class Model_Utils:
@@ -11,13 +9,13 @@ class Model_Utils:
 
     @staticmethod
     def create_default_model(input_shape_size):
-        model = Sequential()
-        model.add(Conv2D(16, (3,3), activation='relu', input_shape=input_shape_size))
-        model.add(Conv2D(16, (3,3), activation='relu'))
-        model.add(Flatten())
-        model.add(Dense(128, activation='relu'))
-        model.add(Dense(1, activation='sigmoid'))
-        model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Accuracy()])
+        model = tf.keras.Sequential()
+        model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape_size))
+        model.add(tf.keras.layers.MaxPooling2D((2, 2)))
+        model.add(tf.keras.layers.Flatten())
+        model.add(tf.keras.layers.Dense(128, activation='relu'))
+        model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         return model
 
     @staticmethod

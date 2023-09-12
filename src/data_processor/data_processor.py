@@ -4,7 +4,6 @@ import tensorflow as tf
 import numpy as np
 import os
 import tensorflow as tf 
-from tensorflow.python.keras.models import Sequential
 from keras.callbacks import CSVLogger
 import uuid
 from model_utilities.model_utils import Model_Utils
@@ -43,35 +42,36 @@ def plot_spectrogram(spectrogram, ax):
 class Data_Processor:
     def __init__(self):
         self.train_ds = []
-        self.val_ds = []
+        self.test_ds = []
         self.train_spectrograms = []
-        self.val_spectrograms = []
         self.test_spectrograms = []
-        self.label_names = []
 
-    def load_datasets(self, data_file_path):
-        data_dir = pathlib.Path(data_file_path)
-        print("[INFO] Loading", data_file_path)
-        self.train_ds, self.val_ds = tf.keras.utils.audio_dataset_from_directory(
-            directory=data_dir,
+    def load_datasets(self, data_file_path, test_file_path):
+        test_dir = pathlib.Path(test_file_path)
+        self.test_ds= tf.keras.utils.audio_dataset_from_directory(
+            directory=test_dir,
             batch_size=64,
-            validation_split=0.2,
+            validation_split=None,
+            subset=None,
             seed=0,
-            subset='both',
             shuffle=True,
             output_sequence_length=16000)
-        self.label_names = np.array(self.train_ds.class_names)
-        print("Label Names:", self.label_names)
+
+        data_dir = pathlib.Path(data_file_path)
+        self.train_ds= tf.keras.utils.audio_dataset_from_directory(
+            directory=data_dir,
+            batch_size=64,
+            validation_split=None,
+            subset=None,
+            seed=123,
+            shuffle=True,
+            output_sequence_length=16000)
 
     def make_spectrogram_datasets(self):
         train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
-        val_ds = self.val_ds.map(squeeze, tf.data.AUTOTUNE)
-        test_ds = val_ds.shard(num_shards=2, index=0)
-        val_ds = val_ds.shard(num_shards=2, index=1)
+        test_ds = self.test_ds.map(squeeze, tf.data.AUTOTUNE)
+
         self.train_spectrograms = train_ds.map(
-            map_func=lambda audio, label: (get_spectrogram(audio), label),
-            num_parallel_calls=tf.data.AUTOTUNE)
-        self.val_spectrograms = val_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE)
         self.test_spectrograms = test_ds.map(
@@ -80,9 +80,6 @@ class Data_Processor:
         
     def get_test_dataset(self):
         return self.test_spectrograms
-    
-    def get_label_names(self):
-        return self.label_names
         
     def plot_dual_wave_spec(self):
         label_names = np.array(self.train_ds.class_names)
@@ -167,8 +164,7 @@ class Data_Processor:
         model = Model_Utils.create_default_model(input_shape)
         history = model.fit(
             self.train_spectrograms,
-            validation_data=self.val_spectrograms,
-            epochs=100,
+            epochs=10,
             callbacks=[csv_logger],
         )
         # Save the model to file

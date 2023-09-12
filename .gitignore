@@ -3,6 +3,7 @@ data_sets
 
 // Trained Models
 trained_models
+trained_model
 
 // Images (for now)
 *.png

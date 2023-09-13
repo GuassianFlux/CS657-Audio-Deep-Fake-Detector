@@ -176,7 +176,7 @@ class Data_Processor:
         history = model.fit(
             self.train_spectrograms,
             validation_data=self.val_spectrograms,
-            epochs=10,
+            epochs=100,
             callbacks=[csv_logger],
         )
 

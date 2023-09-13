@@ -9,4 +9,4 @@ trained_model
 *.png
 
 //Cache Data
-*/__pycache__
+src/__pycache__

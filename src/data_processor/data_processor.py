@@ -15,6 +15,7 @@ from keras.callbacks import CSVLogger
 from model_utilities.model_utils import Model_Utils
 from keras import backend as kerasbackend
 
+
 def squeeze(audio, labels):
   audio = tf.squeeze(audio, axis=-1)
   return audio, labels
@@ -56,6 +57,7 @@ class Data_Processor:
         self.class_names = []
 
     def load_datasets(self, data_file_path):
+        SEQUENCE_LENGTH = 9 * 16000 # 9s
         print("Loading data sets from", data_file_path)
         data_dir = pathlib.Path(data_file_path)
         self.train_ds,val_and_test_ds = tf.keras.utils.audio_dataset_from_directory(
@@ -64,7 +66,7 @@ class Data_Processor:
             validation_split=0.2,
             shuffle=True,
             seed=0,
-            output_sequence_length=16000,
+            output_sequence_length=SEQUENCE_LENGTH,
             subset='both')
         self.val_ds = val_and_test_ds.shard(num_shards=2, index=0)
         self.test_ds = val_and_test_ds.shard(num_shards=2, index=1)

@@ -31,30 +31,6 @@ class ModelTests(unittest.TestCase):
          loaded_model = Model_Utils.load_model('78d8553b-6fec-4924-a0ed-ee571ccfd104')
          print("Finished loading model")
 
-    # def test_training_model(self):
-    #     print("Test Training Model")
-    #     current_directory = os.getcwd()
-    #     print("Current Working Directory:", current_directory)
-    #     POS = os.path.join(current_directory, 'data_sets', 'real_audio')
-    #     if os.path.exists(POS):
-    #         print(POS, "exists.")
-    #     NEG = os.path.join(current_directory, 'data_sets', 'fake_audio', 'generated_audio', 'common_voices_prompts_from_conformer_fastspeech2_pwg_ljspeech')
-    #     if os.path.exists(NEG):
-    #         print(NEG, "exists.")
-    #     pos = tf.data.Dataset.list_files(POS+'/*.wav')
-    #     neg = tf.data.Dataset.list_files(NEG+'/*.wav')
-    #     positives = tf.data.Dataset.zip((pos, tf.data.Dataset.from_tensor_slices(tf.ones(len(pos)))))
-    #     negatives = tf.data.Dataset.zip((neg, tf.data.Dataset.from_tensor_slices(tf.zeros(len(neg)))))
-    #     data = positives.concatenate(negatives)
-    #     data = data.map(preprocess)
-    #     data = data.cache()
-    #     data = data.shuffle(buffer_size=1000)
-    #     data = data.batch(16)
-    #     data = data.prefetch(8)
-    #     train = data.take(50)
-    #     val = data.skip(15).take(25)
-    #     Model_Utils.fit_model(train, val, 1)
-
 
 if __name__=='__main__':
 	unittest.main()

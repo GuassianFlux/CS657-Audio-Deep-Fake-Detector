@@ -71,9 +71,6 @@ class Data_Processor:
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
     
-    def get_dataset(self):
-        return self.train_ds
-
     def get_test_dataset(self):
         return self.test_spectrograms
     

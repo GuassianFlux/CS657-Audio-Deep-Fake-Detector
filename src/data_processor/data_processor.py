@@ -10,11 +10,9 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 import os
-import tensorflow as tf 
 from keras.callbacks import CSVLogger
 from model_utilities.model_utils import Model_Utils
 from keras import backend as kerasbackend
-
 
 def squeeze(audio, labels):
   audio = tf.squeeze(audio, axis=-1)
@@ -32,19 +30,6 @@ def get_spectrogram(waveform):
     # Add a `channels` dimension, so that the spectrogram can be used as image-like input data with convolution layers
     spectrogram = spectrogram[..., tf.newaxis]
     return spectrogram
-
-def plot_spectrogram(spectrogram, ax):
-    if len(spectrogram.shape) > 2:
-        assert len(spectrogram.shape) == 3
-        spectrogram = np.squeeze(spectrogram, axis=-1)
-    # Convert frequencies to log scale and transpose, so that the time is represented on x-axis
-    # Add an epsilon to avoid taking a log of zero
-    log_spec = np.log(spectrogram.T + np.finfo(float).eps)
-    height = log_spec.shape[0]
-    width = log_spec.shape[1]
-    x = np.linspace(0, np.size(spectrogram), num=width, dtype=int)
-    y = range(height)
-    ax.pcolormesh(x,y,log_spec)
 
 class Data_Processor:
     def __init__(self):
@@ -85,75 +70,15 @@ class Data_Processor:
         self.test_spectrograms = test_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
-        
+    
+    def get_dataset(self):
+        return self.train_ds
+
     def get_test_dataset(self):
         return self.test_spectrograms
     
     def get_class_names(self):
         return self.class_names
-        
-    def plot_dual_wave_spec(self):
-        label_names = np.array(self.train_ds.class_names)
-        train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
-        for audio, labels in train_ds.take(1):
-            for i in range(3):
-                label = label_names[labels[i]]
-                waveform = audio[i]
-                spectrogram = get_spectrogram(waveform)
-
-                fig, axes = plt.subplots(2, figsize=(12, 8))
-                timescale = np.arange(waveform.shape[0])
-                axes[0].plot(timescale, waveform.numpy())
-                axes[0].set_title('Waveform')
-                axes[0].set_xlim([0, 16000])
-
-                plot_spectrogram(spectrogram.numpy(), axes[1])
-                axes[1].set_title('Spectrogram')
-                plt.suptitle(label.title())
-                plt.savefig('fake_wave_with_spec.png')
-
-    def plot_first_spectrogram(self):
-        label_names = np.array(self.train_ds.class_names)
-        for spectrograms, spect_labels in self.train_spectrograms.take(1):
-            rows = 3
-            cols = 3
-            n = rows*cols
-            fig, axes = plt.subplots(rows, cols, figsize=(16, 9))
-
-            for i in range(n):
-                r = i // cols
-                c = i % cols
-                ax = axes[r][c]
-                plot_spectrogram(spectrograms[i].numpy(), ax)
-                ax.set_title(label_names[spect_labels[i].numpy()])
-            plt.savefig('fake_spectrograms_plot.png')
-        label_names = np.array(self.val_ds.class_names)
-        for spectrograms, spect_labels in self.val_spectrograms.take(1):
-            rows = 1
-            cols = 1
-            n = rows*cols
-            fig, axes = plt.subplots(rows, cols, figsize=(16, 9))
-
-            plot_spectrogram(spectrograms[i].numpy(), axes)
-            axes.set_title(label_names[spect_labels[i].numpy()])
-            plt.savefig('real_spectrograms_plot.png')   
-
-    def plot_first_waveform(self):
-        label_names = np.array(self.train_ds.class_names)
-        train_ds = self.train_ds.map(squeeze, tf.data.AUTOTUNE)
-        for audio, labels in train_ds.take(1):  
-            plt.figure(figsize=(16, 10))
-            rows = 3
-            cols = 3
-            n = rows * cols
-            for i in range(n):
-                plt.subplot(rows, cols, i+1)
-                audio_signal = audio[i]
-                plt.plot(audio_signal)
-                plt.title(label_names[labels[i]])
-                plt.yticks(np.arange(-1.2, 1.2, 0.2))
-                plt.ylim([-1.1, 1.1])
-                plt.savefig('fake_waveform_plot.png')
 
     def _get_input_shape(self):
         for example_spectrograms, example_spect_labels in self.train_spectrograms.take(1):

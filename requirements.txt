@@ -1,7 +1,8 @@
-pymongo==4.5.0
 tensorflow==2.12
 matplotlib
 tensorflow-io
 pandas
 tensorrt
 seaborn
+noisereduce
+torch

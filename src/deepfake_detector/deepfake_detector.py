@@ -30,7 +30,7 @@ class DeepFake_Detector:
             for i in range(batch_size):
                 output_arr = pred[i]
                 output = output_arr[0]
-                confidence_str = format(output, ".0%") if output >= 0.5 else format((1-output), ".0%")
+                confidence_str = format(output, ".4%") if output >= 0.5 else format((1-output), ".4%")
                 predicted = 1 if output >= 0.5 else 0
                 actual = Y[i]
                 print_color = 'red'
@@ -42,4 +42,4 @@ class DeepFake_Detector:
             break
 
         print(f'Number correct: {correct} out of {batch_size}')
-        print(f'Accuracy: {format(correct / batch_size, ".0%")}')
+        print(f'Accuracy: {format(correct / batch_size, ".4%")}')

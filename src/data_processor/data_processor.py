@@ -12,6 +12,7 @@ import os
 from keras.callbacks import CSVLogger
 from model_utilities.model_utils import Model_Utils
 from keras import backend as kerasbackend
+import datetime
 
 def squeeze(audio, labels):
   audio = tf.squeeze(audio, axis=-1)
@@ -40,10 +41,10 @@ class Data_Processor:
         self.test_spectrograms = []
         self.class_names = []
 
-    def load_datasets(self, data_file_path):
-        SEQUENCE_LENGTH = 9 * 16000 # 9s
-        print("Loading data sets from", data_file_path)
-        data_dir = pathlib.Path(data_file_path)
+    def load_datasets(self, data_path, test_data_path):
+        SEQUENCE_LENGTH = 16000 # 9 * 16000 # 9s
+        print("Loading data sets from", data_path)
+        data_dir = pathlib.Path(data_path)
         self.train_ds,val_and_test_ds = tf.keras.utils.audio_dataset_from_directory(
             directory=data_dir,
             batch_size=64,
@@ -53,7 +54,16 @@ class Data_Processor:
             output_sequence_length=SEQUENCE_LENGTH,
             subset='both')
         self.val_ds = val_and_test_ds.shard(num_shards=2, index=0)
-        self.test_ds = val_and_test_ds.shard(num_shards=2, index=1)
+        #self.test_ds = val_and_test_ds.shard(num_shards=2, index=1)
+        test_data_dir = pathlib.Path(test_data_path)
+        self.test_ds = tf.keras.utils.audio_dataset_from_directory(
+            directory=test_data_dir,
+            batch_size=64,
+            validation_split=0,
+            shuffle=True,
+            seed=0,
+            output_sequence_length=SEQUENCE_LENGTH,
+            subset=None)
         self.class_names = np.array(self.train_ds.class_names)
 
     def make_spectrogram_datasets(self):
@@ -88,6 +98,9 @@ class Data_Processor:
         metrics_logger_callback = CSVLogger(metrics_path, separator=',', append=False)
         # Stop fitting the model once validation loss stops decreasing 
         early_stop_callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, mode='min', verbose=1)
+        # TensorBoard callback
+        # log_dir = os.path.join(models_dir, "tensorboard", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+        # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
         return [metrics_logger_callback, early_stop_callback]
 
     def fit_model(self, models_dir):

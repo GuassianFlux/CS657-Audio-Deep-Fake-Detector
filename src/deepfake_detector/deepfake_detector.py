@@ -7,6 +7,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from model_utilities.model_utils import Model_Utils
 from termcolor import colored
+import tensorflow as tf 
+import numpy
+import sys
+numpy.set_printoptions(threshold=sys.maxsize)
 
 class DeepFake_Detector:
     def __init__(self):
@@ -17,6 +21,17 @@ class DeepFake_Detector:
 
     def set_model(self, model):
         self.loaded_model = model
+
+    def _log_outputs(self, sample):
+        inp = self.loaded_model.input
+        outputs = [layer.output for layer in self.loaded_model.layers]
+        functors = [tf.keras.backend.function([inp], [out]) for out in outputs]
+        layer_outs = [func([sample]) for func in functors]
+        file_name = "output.txt"
+        output_file = os.path.join("trained_model", file_name)
+        with open(output_file, 'w') as file:
+            for idx, layer in enumerate(self.loaded_model.layers):
+                print("layer name {} \noutputs: {}". format(layer.name, numpy.array(layer_outs[idx])), file=file)
 
     def predict_dataset(self, test_spectrogram_ds, class_names):
         print("Making predictions for test dataset...")
@@ -36,7 +51,8 @@ class DeepFake_Detector:
                     correct += 1
                 print(colored(f'WAV {file_num} Prediction: {class_names[predicted]}, Actual: {class_names[actual]}', print_color))
                 file_num += 1
-            break
+            #break
+            #self._log_outputs(X)
 
         print(f'Number correct: {correct} out of {batch_size}')
         print(f'Accuracy: {format(correct / batch_size, ".0%")}')

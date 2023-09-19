@@ -8,7 +8,7 @@ class Noise_Generator:
     def add_agwn(waveform, snr):
         # Compute average amplitude
         wav_abs = np.absolute(waveform)
-        wav_mean = np.mean(wav_abs);
+        wav_mean = np.mean(wav_abs)
 
         # Produce noise
         noise_amp = wav_mean / snr

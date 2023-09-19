@@ -7,6 +7,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from model_utilities.model_utils import Model_Utils
 from termcolor import colored
+import numpy as np
 
 class DeepFake_Detector:
     def __init__(self):
@@ -27,16 +28,18 @@ class DeepFake_Detector:
             batch_size = len(Y)
             pred = self.loaded_model.predict(X)
             for i in range(batch_size):
-                predicted_arr = [1 if prediction > 0.5 else 0 for prediction in pred[i]]
-                predicted = predicted_arr[0]
+                output_arr = pred[i]
+                output = output_arr[0]
+                confidence_str = format(output, ".4%") if output >= 0.5 else format((1-output), ".4%")
+                predicted = 1 if output >= 0.5 else 0
                 actual = Y[i]
                 print_color = 'red'
                 if predicted == actual:
                     print_color = 'green'
                     correct += 1
-                print(colored(f'WAV {file_num} Prediction: {class_names[predicted]}, Actual: {class_names[actual]}', print_color))
+                print(colored(f'WAV {file_num} Prediction: {class_names[predicted]}, Actual: {class_names[actual]}, Confidence: {confidence_str} ', print_color))
                 file_num += 1
             break
 
         print(f'Number correct: {correct} out of {batch_size}')
-        print(f'Accuracy: {format(correct / batch_size, ".0%")}')
+        print(f'Accuracy: {format(correct / batch_size, ".4%")}')

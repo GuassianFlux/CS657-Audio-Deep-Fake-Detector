@@ -81,26 +81,32 @@ class Data_Processor:
             break
         input_shape = example_spectrograms.shape[1:]
         return input_shape
+    
+    def _create_callbacks(self, models_dir):
+        # Save the metrics log adjacent to the model
+        metrics_path = os.path.join(models_dir, Model_Utils.metrics_file_name)
+        metrics_logger_callback = CSVLogger(metrics_path, separator=',', append=False)
+        # Stop fitting the model once validation loss stops decreasing 
+        early_stop_callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, mode='min', verbose=1)
+        return [metrics_logger_callback, early_stop_callback]
 
     def fit_model(self, models_dir):
         # Cleanup or created model folder
         Model_Utils.build_model_path(models_dir)
 
+        # Shape that the first layer can expect
+        input_shape = self._get_input_shape()
+
         # Path where all of the model history and metrics will be saved
-        metrics_path = os.path.join(models_dir, Model_Utils.metrics_file_name)
-        csv_logger = CSVLogger(metrics_path, separator=',', append=False)
+        callbacks = self._create_callbacks(models_dir)
 
         # Train model
-        input_shape = self._get_input_shape()
         model = Model_Utils.create_default_model(input_shape)
-
-        # TODO: Look into early stop callback. I have seen examples that 
-        # use this and it is supposed to prevent overtraining.
         history = model.fit(
             self.train_spectrograms,
             validation_data=self.val_spectrograms,
-            epochs=10,
-            callbacks=[csv_logger],
+            epochs=25,
+            callbacks=callbacks,
         )
 
         # Save the model and history plots to file

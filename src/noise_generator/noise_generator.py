@@ -22,7 +22,7 @@ class Noise_Generator:
     
     @staticmethod
     def add_burst(waveform, snr):
-        TOGGLE_CHANCE = 0.002 # 0.2%
+        TOGGLE_RATE = 1000 # Toggles on average every 500 samples
 
         # Compute max amplitude
         wav_abs = np.absolute(waveform)
@@ -44,7 +44,7 @@ class Noise_Generator:
                 noise_wav.append(sample)
 
             rand = np.random.random()
-            if(rand < TOGGLE_CHANCE):
+            if(rand < 1/TOGGLE_RATE):
                 noise_toggle = not noise_toggle
 
         # Clip noise waveform so that values are within int16 range

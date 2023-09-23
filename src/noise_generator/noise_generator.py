@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import signal
 
 INT16_MIN=-32768
 INT16_MAX=32767
@@ -22,26 +21,33 @@ class Noise_Generator:
         return noise_wav
     
     @staticmethod
-    def add_burst(waveform):
-        print(waveform)
+    def add_burst(waveform, snr):
+        TOGGLE_CHANCE = 0.002 # 0.2%
+
+        # Compute max amplitude
         wav_abs = np.absolute(waveform)
         wav_max = np.max(wav_abs);
 
-        noise_amp = wav_max / 15
+        # Initialize noise variables
         noise_wav = []
-        toggle = False
+        noise_toggle = False
+        noise_amp = wav_max / snr
+
+        # For each sample in the waveform, evaluate a boolean toggle state and randomly update it
+        # If true, add the burst noise to the sample
+        # If false, do not alter the signal
         for sample in waveform:
-            if(toggle):
+            if(noise_toggle):
                 noise_sample = (sample+noise_amp).astype(np.int16)
                 noise_wav.append(noise_sample)
             else:
                 noise_wav.append(sample)
 
             rand = np.random.random()
-            if(rand > 0.998):
-                toggle = not toggle
+            if(rand < TOGGLE_CHANCE):
+                noise_toggle = not noise_toggle
 
+        # Clip noise waveform so that values are within int16 range
         noise_wav = np.clip(noise_wav, INT16_MIN, INT16_MAX)
-        print(noise_wav)
         return noise_wav
         

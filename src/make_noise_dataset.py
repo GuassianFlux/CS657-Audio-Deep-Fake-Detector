@@ -21,7 +21,8 @@ def main(argv):
         outputfile = os.path.join(output_dir,filename)
         if os.path.isfile(inputfile):
             samplerate, wav = wavfile.read(inputfile)
-            wav = Noise_Generator.add_agwn(wav,snr)
+            # wav = Noise_Generator.add_agwn(wav,snr)
+            wav = Noise_Generator.add_burst(wav)
             wavfile.write(outputfile,samplerate,wav)
 
 if __name__ == "__main__":

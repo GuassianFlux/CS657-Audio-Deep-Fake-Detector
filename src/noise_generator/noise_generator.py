@@ -22,7 +22,7 @@ class Noise_Generator:
     
     @staticmethod
     def add_burst(waveform, snr):
-        TOGGLE_RATE = 1000 # Toggles on average every 500 samples
+        TOGGLE_RATE = 1000 # Toggles on average every 1000 samples
 
         # Compute max amplitude
         wav_abs = np.absolute(waveform)

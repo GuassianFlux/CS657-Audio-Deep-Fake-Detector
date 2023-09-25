@@ -10,6 +10,7 @@ from termcolor import colored
 import tensorflow as tf 
 import numpy
 import sys
+from keract import get_activations, display_activations
 numpy.set_printoptions(threshold=sys.maxsize)
 
 class DeepFake_Detector:
@@ -33,6 +34,10 @@ class DeepFake_Detector:
             for idx, layer in enumerate(self.loaded_model.layers):
                 print("layer name {} \noutputs: {}". format(layer.name, numpy.array(layer_outs[idx])), file=file)
 
+    def _show_ouputs(self, input):
+        activations = get_activations(self.loaded_model, input, auto_compile=True)
+        display_activations(activations, cmap=None, save=False, directory='.', data_format='channels_last', fig_size=(24, 24), reshape_1d_layers=False)
+
     def predict_dataset(self, test_spectrogram_ds, class_names):
         print("Making predictions for test dataset...")
         file_num = 1
@@ -53,12 +58,8 @@ class DeepFake_Detector:
                     correct += 1
                 print(colored(f'WAV {file_num} Prediction: {class_names[predicted]}, Actual: {class_names[actual]}, Confidence: {confidence_str} ', print_color))
                 file_num += 1
-            #break
-            #self._log_outputs(X)
-            from keract import get_activations, display_activations
-            keract_inputs = X[:1]
-            activations = get_activations(self.loaded_model, keract_inputs)
-            display_activations(activations, cmap="gray", save=False)
+
+            # self._show_ouputs(X[:1])
 
         print(f'Number correct: {correct} out of {batch_size}')
         print(f'Accuracy: {format(correct / batch_size, ".4%")}')

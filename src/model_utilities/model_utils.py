@@ -25,6 +25,8 @@ class Model_Utils:
         model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape_size))
         # Max Pooling: Converts the 3x3 matrix to a 2x2, finds the most significant features of the matrix
         model.add(tf.keras.layers.MaxPooling2D((2, 2)))
+        # Dropout: Randomly disables neurons passing to next layer to enforce stronger learning patterns
+        model.add(tf.keras.layers.Dropout(0.5)),
         # Flatten: converts the matrix into a 1D array
         model.add(tf.keras.layers.Flatten())
         # Dense: Network layers

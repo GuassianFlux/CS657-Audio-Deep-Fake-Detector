@@ -12,7 +12,6 @@ import os
 from keras.callbacks import CSVLogger
 from model_utilities.model_utils import Model_Utils
 from keras import backend as kerasbackend
-import datetime
 
 def squeeze(audio, labels):
   audio = tf.squeeze(audio, axis=-1)
@@ -121,6 +120,8 @@ class Data_Processor:
             epochs=25,
             callbacks=callbacks,
         )
+
+        
 
         # Save the model and history plots to file
         model_path= os.path.join(models_dir, Model_Utils.model_file_name)

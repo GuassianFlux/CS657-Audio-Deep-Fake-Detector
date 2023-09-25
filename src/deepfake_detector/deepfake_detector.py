@@ -7,6 +7,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from model_utilities.model_utils import Model_Utils
 from termcolor import colored
+import tensorflow as tf 
+import numpy
+import sys
+numpy.set_printoptions(threshold=sys.maxsize)
 
 class DeepFake_Detector:
     def __init__(self):
@@ -51,6 +55,10 @@ class DeepFake_Detector:
                 file_num += 1
             #break
             #self._log_outputs(X)
+            from keract import get_activations, display_activations
+            keract_inputs = X[:1]
+            activations = get_activations(self.loaded_model, keract_inputs)
+            display_activations(activations, cmap="gray", save=False)
 
         print(f'Number correct: {correct} out of {batch_size}')
         print(f'Accuracy: {format(correct / batch_size, ".4%")}')

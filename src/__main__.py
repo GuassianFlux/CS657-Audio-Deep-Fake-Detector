@@ -15,11 +15,9 @@ import shutil
 # constrcuted based on the folders in this directory(Ex. fake, real). The small dataset can be 
 # used for demo. Make sure the dataset only has a real and fake folder as children.
 DATASET_PATH = '/workspaces/small_data_sets'
-# DATASET_PATH = '/workspaces/data_sets'
 
 # Test Dataset Paths
-TEST_DATASET_PATH='/workspaces/test_data_set'
-#TEST_DATASET_PATH='/workspaces/noisey_test_data_set'
+TEST_DATASET_PATH='/workspaces/filtered_noisy_test_data_set'
 
 # Path where the trained model will be saved along with metrics
 TRAINED_MODEL = "/workspaces/trained_model"
@@ -39,7 +37,7 @@ if __name__ == "__main__":
     tf.get_logger().setLevel('ERROR')
 
     # Delete the old trained models folder structure
-    delete_old_models();
+    delete_old_models()
 
     # Create initialize data processor and load datasets
     processor = Data_Processor()
@@ -57,4 +55,5 @@ if __name__ == "__main__":
     detector.load_model_from_file(TRAINED_MODEL)
     test_ds = processor.get_test_dataset()
     class_names = processor.get_class_names()
+    print("Making predictions for test dataset", TEST_DATASET_PATH)
     detector.predict_dataset(test_ds, class_names)

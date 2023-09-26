@@ -53,16 +53,16 @@ class Data_Processor:
             output_sequence_length=SEQUENCE_LENGTH,
             subset='both')
         self.val_ds = val_and_test_ds.shard(num_shards=2, index=0)
-        #self.test_ds = val_and_test_ds.shard(num_shards=2, index=1)
-        test_data_dir = pathlib.Path(test_data_path)
-        self.test_ds = tf.keras.utils.audio_dataset_from_directory(
-            directory=test_data_dir,
-            batch_size=64,
-            validation_split=0,
-            shuffle=True,
-            seed=0,
-            output_sequence_length=SEQUENCE_LENGTH,
-            subset=None)
+        self.test_ds = val_and_test_ds.shard(num_shards=2, index=1)
+        # test_data_dir = pathlib.Path(test_data_path)
+        # self.test_ds = tf.keras.utils.audio_dataset_from_directory(
+        #     directory=test_data_dir,
+        #     batch_size=64,
+        #     validation_split=0,
+        #     shuffle=True,
+        #     seed=0,
+        #     output_sequence_length=SEQUENCE_LENGTH,
+        #     subset=None)
         self.class_names = np.array(self.train_ds.class_names)
 
     def make_spectrogram_datasets(self):
@@ -100,7 +100,7 @@ class Data_Processor:
         # TensorBoard callback
         # log_dir = os.path.join(models_dir, "tensorboard", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
         # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-        return [metrics_logger_callback, early_stop_callback]
+        return [metrics_logger_callback] #, early_stop_callback]
 
     def fit_model(self, models_dir):
         # Cleanup or created model folder
@@ -117,7 +117,7 @@ class Data_Processor:
         history = model.fit(
             self.train_spectrograms,
             validation_data=self.val_spectrograms,
-            epochs=25,
+            epochs=15,
             callbacks=callbacks,
         )
 

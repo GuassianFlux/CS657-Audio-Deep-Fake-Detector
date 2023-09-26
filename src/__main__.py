@@ -20,6 +20,9 @@ DATASET_PATH = '/workspaces/small_data_sets'
 # Path where the trained model will be saved along with metrics
 TRAINED_MODEL = "/workspaces/trained_model"
 
+# Path where prediction data and logs are stored. This directory is cleared each time a dataset is predicted
+PREDICTION_DATA_PATH = "/workspaces/prediction_data"
+
 # Legacy model folder structure. This will be deleted if it exists.
 OLD_TRAINED_MODELS = "/workspaces/trained_models"
 def delete_old_models():
@@ -53,4 +56,4 @@ if __name__ == "__main__":
     detector.load_model_from_file(TRAINED_MODEL)
     test_ds = processor.get_test_dataset()
     class_names = processor.get_class_names()
-    detector.predict_dataset(test_ds, class_names)
+    detector.predict_dataset(test_ds, class_names, PREDICTION_DATA_PATH)

@@ -7,6 +7,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import pathlib
 import tensorflow as tf
+import tensorflow_io as tfio
 import numpy as np
 import os
 from keras.callbacks import CSVLogger
@@ -69,7 +70,7 @@ class Data_Processor:
         self.test_spectrograms = test_ds.map(
             map_func=lambda audio, label: (get_spectrogram(audio), label),
             num_parallel_calls=tf.data.AUTOTUNE).cache().prefetch(tf.data.AUTOTUNE)
-    
+
     def get_test_dataset(self):
         return self.test_spectrograms
     

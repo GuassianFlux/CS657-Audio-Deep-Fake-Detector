@@ -21,6 +21,7 @@ class Model_Utils:
     def create_default_model(input_shape_size):
         # Sequential Model: plain stack of layers where each layer has one input and one output
         model = tf.keras.Sequential()
+        # model.add(tf.keras.layers.Masking(mask_value=0.,input_shape=input_shape_size))
         # Conv2D: Converts spectrogram image to a 2D 3x3 matrix of pixels
         model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape_size))
         # Max Pooling: Converts the 3x3 matrix to a 2x2, finds the most significant features of the matrix

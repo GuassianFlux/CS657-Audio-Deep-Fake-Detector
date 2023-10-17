@@ -10,3 +10,7 @@ trained_model
 
 //Cache Data
 **/__pycache__/
+
+prediction_data
+
+test_data_set

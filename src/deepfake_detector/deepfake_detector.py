@@ -9,6 +9,7 @@ from model_utilities.model_utils import Model_Utils
 from termcolor import colored
 from keract import get_activations, display_activations
 import numpy as np
+import tensorflow as tf
 import shutil
 
 class DeepFake_Detector:
@@ -30,11 +31,11 @@ class DeepFake_Detector:
         output_file = os.path.join(prediction_dir, file_name)
         with open(output_file, 'w') as file:
             for idx, layer in enumerate(self.loaded_model.layers):
-                print("layer name {} \noutputs: {}". format(layer.name, numpy.array(layer_outs[idx])), file=file)
+                print("layer name {} \noutputs: {}". format(layer.name, np.array(layer_outs[idx])), file=file)
 
     def _show_ouputs(self, input, prediction_dir):
-        activations = get_activations(self.loaded_model, input) #, auto_compile=True)
-        display_activations(activations, cmap='YlGnBu', save=True, directory=prediction_dir)
+        activations = get_activations(self.loaded_model, input)
+        display_activations(activations, save=True, directory=prediction_dir)
 
     def build_prediction_path(self, prediction_dir):
         if os.path.exists(prediction_dir):
@@ -63,10 +64,13 @@ class DeepFake_Detector:
                 if predicted == actual:
                     print_color = 'green'
                     correct += 1
+                    if i==2:
+                        self._show_ouputs(X[i-1:i], prediction_dir)
+                        self._log_outputs(X[i-1:i], prediction_dir)
+                # else:
+                #     self._show_ouputs(X[i-1:i], prediction_dir)
                 print(colored(f'WAV {file_num} Prediction: {class_names[predicted]}, Actual: {class_names[actual]}, Confidence: {confidence_str} ', print_color))
                 file_num += 1
-
-            #self._show_ouputs(X[1:2], prediction_dir)
 
         print(f'Number correct: {correct} out of {batch_size}')
         print(f'Accuracy: {format(correct / batch_size, ".4%")}')

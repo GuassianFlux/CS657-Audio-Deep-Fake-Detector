@@ -40,7 +40,7 @@ class Data_Processor:
         self.test_spectrograms = []
         self.class_names = []
 
-    def load_datasets(self, data_file_path):
+    def load_datasets(self, data_file_path, test_data_path):
         SEQUENCE_LENGTH = 9 * 16000 # 9s
         print("Loading data sets from", data_file_path)
         data_dir = pathlib.Path(data_file_path)
@@ -54,6 +54,15 @@ class Data_Processor:
             subset='both')
         self.val_ds = val_and_test_ds.shard(num_shards=2, index=0)
         self.test_ds = val_and_test_ds.shard(num_shards=2, index=1)
+        # test_data_dir = pathlib.Path(test_data_path)
+        # self.test_ds = tf.keras.utils.audio_dataset_from_directory(
+        #     directory=test_data_dir,
+        #     batch_size=64,
+        #     validation_split=0,
+        #     shuffle=True,
+        #     seed=0,
+        #     output_sequence_length=SEQUENCE_LENGTH,
+        #     subset=None)
         self.class_names = np.array(self.train_ds.class_names)
 
     def make_spectrogram_datasets(self):

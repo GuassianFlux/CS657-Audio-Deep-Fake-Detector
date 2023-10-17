@@ -15,7 +15,9 @@ import shutil
 # constrcuted based on the folders in this directory(Ex. fake, real). The small dataset can be 
 # used for demo. Make sure the dataset only has a real and fake folder as children.
 DATASET_PATH = '/workspaces/small_data_sets'
-# DATASET_PATH = '/workspaces/data_sets'
+
+# Test Dataset Paths
+TEST_DATASET_PATH='/workspaces/burst_test_data_set'
 
 # Path where the trained model will be saved along with metrics
 TRAINED_MODEL = "/workspaces/trained_model"
@@ -42,13 +44,13 @@ if __name__ == "__main__":
 
     # Create initialize data processor and load datasets
     processor = Data_Processor()
-    processor.load_datasets(DATASET_PATH)
+    processor.load_datasets(DATASET_PATH, TEST_DATASET_PATH)
     processor.make_spectrogram_datasets()
 
     # Trains a new model with the loaded datasets.
     # This can be commented out if there is already a trained model saved
     # and you don't want to train a new one. 
-    processor.fit_model(TRAINED_MODEL)
+    #processor.fit_model(TRAINED_MODEL)
     
     # Load the trained model and make predictions on the 
     # on the test dataset

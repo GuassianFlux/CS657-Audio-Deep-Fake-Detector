@@ -38,7 +38,7 @@ if __name__ == "__main__":
     tf.get_logger().setLevel('ERROR')
 
     # Delete the old trained models folder structure
-    delete_old_models();
+    delete_old_models()
 
     # Create initialize data processor and load datasets
     processor = Data_Processor()

@@ -1,9 +1,13 @@
 // Test Data
 data_sets
 
-// Trained Models
+// output folders
 trained_models
 trained_model
+prediction_data
+white_noise_data_sets
+burst_noise_data_sets
+
 
 // Images (for now)
 *.png

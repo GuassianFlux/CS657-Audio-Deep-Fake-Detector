@@ -11,7 +11,7 @@ class Noise_Generator:
         wav_mean = np.mean(wav_abs);
 
         # Produce noise
-        noise_amp = wav_mean / snr
+        noise_amp = np.divide(float(wav_mean), float(snr))
         noise = np.random.normal(0, noise_amp, len(waveform)).astype(np.int16)
 
         # Combine original wavefile with noise
@@ -31,7 +31,7 @@ class Noise_Generator:
         # Initialize noise variables
         noise_wav = []
         noise_toggle = False
-        noise_amp = wav_max / snr
+        noise_amp = np.divide(float(wav_max), float(snr))
 
         # For each sample in the waveform, evaluate a boolean toggle state and randomly update it
         # If true, add the burst noise to the sample

@@ -71,5 +71,5 @@ class DeepFake_Detector:
                 print(colored(f'WAV {file_num} Prediction: {class_names[predicted]}, Actual: {class_names[actual]}, Confidence: {confidence_str} ', print_color))
                 file_num += 1
 
-        print(f'Number correct: {correct} out of {batch_size}')
-        print(f'Accuracy: {format(correct / batch_size, ".4%")}')
+        print(f'Number correct: {correct} out of {file_num}')
+        print(f'Accuracy: {format(correct / file_num, ".4%")}')

@@ -46,7 +46,7 @@ class Data_Processor:
         data_dir = pathlib.Path(data_file_path)
         self.train_ds,val_and_test_ds = tf.keras.utils.audio_dataset_from_directory(
             directory=data_dir,
-            batch_size=64,
+            batch_size=32,
             validation_split=0.2,
             shuffle=True,
             seed=0,

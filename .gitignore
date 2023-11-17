@@ -7,6 +7,8 @@ trained_model
 prediction_data
 white_noise_data_sets
 burst_noise_data_sets
+filtered_noise_data_sets
+metrics
 
 
 // Images (for now)

@@ -16,7 +16,7 @@ fake_dataset_path='/workspaces/data_sets/fake'
 fake_white_noise_dataset_path='/workspaces/white_noise_data_sets/fake'
 
 # Add white noise to real data
-python /workspaces/src/make_noise_dataset.py $real_dataset_path $real_white_noise_dataset_path --snr 5 --type burst
+python /workspaces/src/make_noise_dataset.py $real_dataset_path $real_white_noise_dataset_path --snr 15 --type burst
 
 # Add white noise to fake data
-python /workspaces/src/make_noise_dataset.py $fake_dataset_path $fake_white_noise_dataset_path --snr 5 --type burst
+python /workspaces/src/make_noise_dataset.py $fake_dataset_path $fake_white_noise_dataset_path --snr 15 --type burst
